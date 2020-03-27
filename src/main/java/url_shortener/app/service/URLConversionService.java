@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import url_shortener.app.common.IDConverter;
 import url_shortener.app.repository.URLRepository;
 
-// @Service to indicate that it's holding the business logi
+// @Service to indicate that it's holding the business logic
 @Service
 public class URLConversionService {
     private static final Logger LOGGER = LoggerFactory.getLogger(URLConversionService.class);

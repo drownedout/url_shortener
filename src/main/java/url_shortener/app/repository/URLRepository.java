@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import redis.clients.jedis.Jedis;
 
+// @Repository’s job is to catch persistence specific exceptions and
+// rethrow them as one of Spring’s unified unchecked exception.
 @Repository
 public class URLRepository {
     private final Jedis jedis;
@@ -16,12 +18,6 @@ public class URLRepository {
         this.jedis = new Jedis();
         this.idKey = "id";
         this.urlKey = "url:"; // Redis best practices - name followed by a ":"
-    }
-
-    public URLRepository(Jedis jedis, String idKey, String urlKey) {
-        this.jedis = jedis;
-        this.idKey = idKey;
-        this.urlKey = urlKey;
     }
 
     public Long incrementID() {
