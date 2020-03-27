@@ -63,11 +63,6 @@ class RequestShortener {
     private String url;
 
     @JsonCreator
-    public RequestShortener() {
-
-    }
-
-    @JsonCreator
     public RequestShortener(@JsonProperty("url") String url) {
         this.url = url;
     }
