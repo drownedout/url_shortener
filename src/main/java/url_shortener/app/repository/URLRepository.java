@@ -12,12 +12,14 @@ public class URLRepository {
     private final Jedis jedis;
     private final String idKey;
     private final String urlKey;
+    private final String addressKey;
     private static final Logger LOGGER = LoggerFactory.getLogger(URLRepository.class);
 
     public URLRepository() {
         this.jedis = new Jedis();
         this.idKey = "id";
         this.urlKey = "url:"; // Redis best practices - name followed by a ":"
+        this.addressKey = "address:";
     }
 
     public Long incrementID() {
@@ -26,11 +28,22 @@ public class URLRepository {
         return id - 1;
     }
 
+    public boolean verifyExistingURL(String longUrl) {
+      String redisID = jedis.hget(addressKey, addressKey + longUrl);
+
+      if (redisID == null) {
+        return false;
+      }
+
+      return true;
+    }
+
     public void saveURL(String key, String longUrl) {
         LOGGER.info("Saving: {} at {}", longUrl, key);
 
         // hset takes three parameters - key name, key value, and value
         jedis.hset(urlKey, key, longUrl);
+        jedis.hset(addressKey, addressKey + longUrl, key);
     }
 
     public String getURL(Long id) throws Exception {
@@ -43,5 +56,14 @@ public class URLRepository {
         }
 
         return url;
+    }
+
+    public Long getRedisURLID(String longUrl) {
+      String redisKey = jedis.hget(addressKey, addressKey + longUrl);
+      String[] redisIDComponents = redisKey.split(":");
+
+      String redisID = redisIDComponents[1];
+
+      return Long.parseLong(redisID);
     }
 }

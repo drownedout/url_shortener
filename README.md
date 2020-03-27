@@ -15,12 +15,7 @@ I chose Spring because it is a well-documented and popular Java framework that
 would allow me to build something quickly.
 
 For my database, I chose Redis because there was plenty of documentation and
-I needed to store a minimal amount of data. However, I realized (too late) that
-my application should also verify if a URL already exists. Given the
-restrictions of Redis, I might have chosen a different database in order
-to mitigate this. Another option would be to have another data structure that
-holds all of the urls given to me by the user and checking that before
-saving a new URL.
+I needed to store a minimal amount of data.
 
 The front end is in pure vanilla Javascript, CSS and was very easy to implement.
 

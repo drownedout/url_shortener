@@ -30,22 +30,36 @@ public class URLConversionService {
     public String shortenURL(String localURL, String originalURL) {
         LOGGER.info("Shortening the url, {}", originalURL);
         String urlKey = "url:";
+        String addressKey = "address:";
 
-        // Increment redis ID
-        Long redisID = urlRepository.incrementID();
+        boolean urlAlreadyExist = urlRepository.verifyExistingURL(originalURL);
 
-        // Use the returned ID to create a unique base62 ID
-        String uniqueID = IDConverter.INSTANCE.createUniqueID(redisID);
+        if (!urlAlreadyExist) {
+          // Increment redis ID
+          Long redisID = urlRepository.incrementID();
 
-        urlRepository.saveURL(urlKey + redisID, originalURL);
+          urlRepository.saveURL(urlKey + redisID, originalURL);
 
-        // Generate an appropriately formatted local url
-        String formattedLocalURL = formatLocalURLFromShortener(localURL);
+          // Use the returned ID to create a unique base62 ID
+          String uniqueID = IDConverter.INSTANCE.createUniqueID(redisID);
+          // Generate an appropriately formatted local url
+          String formattedLocalURL = formatLocalURLFromShortener(localURL);
 
-        // Concat the newly formatted local url with a unique ID
-        String shortenedURL = formattedLocalURL + uniqueID;
+          // Concat the newly formatted local url with a unique ID
+          String shortenedURL = formattedLocalURL + uniqueID;
 
-        return shortenedURL;
+          return shortenedURL;
+
+        }
+          Long redisURLID = urlRepository.getRedisURLID(originalURL);
+          String uniqueID = IDConverter.INSTANCE.createUniqueID(redisURLID);
+          // Generate an appropriately formatted local url
+          String formattedLocalURL = formatLocalURLFromShortener(localURL);
+
+          // Concat the newly formatted local url with a unique ID
+          String shortenedURL = formattedLocalURL + uniqueID;
+
+          return shortenedURL;
     }
 
     /**
