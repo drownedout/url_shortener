@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="Shorten all your URLs">
+        <title>URL Shortener</title>
+        <style>
+          body {
+            font-family: sans-serif;
+            padding: 50px 0;
+          }
+          h1 {
+            text-align: center;
+            margin: 2rem;
+          }
+          form {
+            border: 1px solid #eee;
+            padding: 40px 20px;
+            width: 40%;
+            margin: 2rem auto;
+            -webkit-box-shadow: 10px 10px 38px 2px rgba(0,0,0,0.1);
+            -moz-box-shadow: 10px 10px 38px 2px rgba(0,0,0,0.1);
+            box-shadow: 10px 10px 38px 2px rgba(0,0,0,0.1);
+          }
+          .input-container {
+            width: 90%;
+            margin: 0 auto;
+          }
+          label {
+            font-weight: 700;
+            color: #222;
+            display: block;
+            margin: 1rem 0;
+          }
+          input {
+            border: 1px solid #ccc;
+            width: 90%;
+            padding: 10px 10px;
+            font-size: 18px;
+            outline: 0;
+          }
+          input:focus {
+            outline: 1px solid #0d51bd;
+          }
+          button {
+            background-color: #fef;
+            margin: 2rem 0 0;
+            font-size: 18px;
+            background-color: #3080ff;
+            color: #fff;
+            padding: 8px 25px;
+            border: 1px solid #0d51bd;
+            border-radius: 20px;
+          }
+          button:hover {
+            cursor: pointer;
+            background-color: #4191ff;
+          }
+          button:disabled {
+            cursor: pointer;
+            background-color: #5280ff;
+          }
+          a {
+            text-decoration: none;
+            color: blue;
+          }
+        </style>
+    </head>
+    <body>
+        <main>
+            <section>
+              <h1>URL Shortener</h1>
+                <form id="url-form">
+                    <div class="input-container">
+                      <label for="url">Input URL</label>
+                      <input name="url" type="text" id="url" required/>
+                      <button type="submit" id="btn-submit">Submit</button>
+                    </div>
+                </form>
+                <div class="result-container">
+                  <h1><a id="result"></a></h1>
+                </div>
+            </section>
+        </main>
+        <script>
+          const scriptURL = 'http://localhost:8080/shorten';
+          const form = document.forms['url-form'];
+          const button = document.getElementById('btn-submit');
+          const url_input = document.getElementById('url');
+          let invalid_url = false;
+
+          // Adds shortened URL to the DOM
+          function addShortenedURL(text, invalid_url=false) {
+              const result_link = document.getElementById("result");
+              result_link.innerHTML = text;
+
+              if (invalid_url) {
+                result_link.style.color = "red";
+              } else {
+                const shortened_url = text.split('/').pop();
+                result_link.href = `/${shortened_url}`;
+              }
+              button.disabled = false;
+              url_input.value = '';
+          }
+
+          // Forms the URL for the backend
+          function handleURL(url) {
+            if (url.startsWith('http://')) {
+              url = url.slice(7);
+            } else if (url.startsWith('https://')) {
+              url = url.slice(8);
+            }
+
+            return url;
+          }
+
+          form.addEventListener("submit", e => {
+            const form_instance = new FormData(form);
+            let url = form_instance.get('url').toLowerCase();
+
+            // Prevents user from hitting submit multiple times between
+            // requests
+            button.disabled = true;
+            e.preventDefault();
+
+            // To handle a bug in backend
+            url = handleURL(url);
+
+            fetch(scriptURL, {
+              method: 'POST',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ "url": url })
+            })
+            .then(response => {
+              if(!response.ok) {
+                invalid_url = true
+                return 'Invalid URL, please try again';
+              }
+              return response.text();
+            })
+            .then(text => {
+              addShortenedURL(text, invalid_url);
+            })
+            .catch(error => {
+              console.log(error);
+              addShortenedURL('An error occurred, try again', true);
+            });
+          });
+
+        </script>
+    </body>
+</html>
